@@ -38,11 +38,11 @@ class DataLoader(object):
     def create_tfdata_iter(self, filenames, fns_all_trn_data, batch_size, dir_bm_eyes, resolution, 
                            prob_random_color_match, use_da_motion_blur, use_bm_eyes):
         tf_fns = tf.constant(filenames, dtype=tf.string) # use tf_fns=filenames is also fine
-        dataset = tf.data.Dataset.from_tensor_slices(tf_fns) 
+        dataset = tf.compat.v1.data.Dataset.from_tensor_slices(tf_fns) 
         dataset = dataset.shuffle(len(filenames))
         dataset = dataset.apply(
-            tf.contrib.data.map_and_batch(
-                lambda filenames: tf.py_func(
+            tf.data.experimental.map_and_batch(
+                lambda filenames: tf.compat.v1.py_func(
                     func=read_image, 
                     inp=[filenames, 
                          fns_all_trn_data, 

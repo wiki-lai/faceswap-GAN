@@ -1,5 +1,5 @@
 from keras.layers import Lambda, concatenate
-from tensorflow.contrib.distributions import Beta
+from tensorflow.compat.v1.distributions import Beta
 from .instance_normalization import InstanceNormalization
 import keras.backend as K
 import tensorflow as tf
@@ -79,7 +79,7 @@ def reconstruction_loss(real, fake_abgr, mask_eyes, model_outputs, **weights):
     
     for out in model_outputs[:-1]:
         out_size = out.get_shape().as_list()
-        resized_real = tf.image.resize_images(real, out_size[1:3])
+        resized_real = tf.image.resize(real, out_size[1:3])
         loss_G += weights['w_recon'] * calc_loss(out, resized_real, "l1")    
     return loss_G
 
@@ -91,7 +91,7 @@ def edge_loss(real, fake_abgr, mask_eyes, **weights):
     loss_G += weights['w_edge'] * calc_loss(first_order(fake_bgr, axis=1), first_order(real, axis=1), "l1")  
     loss_G += weights['w_edge'] * calc_loss(first_order(fake_bgr, axis=2), first_order(real, axis=2), "l1") 
     shape_mask_eyes = mask_eyes.get_shape().as_list()
-    resized_mask_eyes = tf.image.resize_images(mask_eyes, [shape_mask_eyes[1]-1, shape_mask_eyes[2]-1]) 
+    resized_mask_eyes = tf.image.resize(mask_eyes, [shape_mask_eyes[1]-1, shape_mask_eyes[2]-1]) 
     loss_G += weights['w_eyes'] * K.mean(K.abs(resized_mask_eyes * \
                                                (first_order(fake_bgr, axis=1) - first_order(real, axis=1))))
     loss_G += weights['w_eyes'] * K.mean(K.abs(resized_mask_eyes * \
@@ -108,12 +108,12 @@ def perceptual_loss(real, fake_abgr, distorted, mask_eyes, vggface_feats, **weig
         x -= [91.4953, 103.8827, 131.0912]
         return x    
     
-    real_sz224 = tf.image.resize_images(real, [224, 224])
+    real_sz224 = tf.image.resize(real, [224, 224])
     real_sz224 = Lambda(preprocess_vggface)(real_sz224)
     dist = Beta(0.2, 0.2)
     lam = dist.sample() # use mixup trick here to reduce foward pass from 2 times to 1.
     mixup = lam*fake_bgr + (1-lam)*fake
-    fake_sz224 = tf.image.resize_images(mixup, [224, 224])
+    fake_sz224 = tf.image.resize(mixup, [224, 224])
     fake_sz224 = Lambda(preprocess_vggface)(fake_sz224)
     real_feat112, real_feat55, real_feat28, real_feat7 = vggface_feats(real_sz224)
     fake_feat112, fake_feat55, fake_feat28, fake_feat7  = vggface_feats(fake_sz224)

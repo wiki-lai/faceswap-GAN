@@ -317,7 +317,9 @@ class FaceswapGANModel():
         return errGA, errGB
     
     def train_one_batch_D(self, data_A, data_B):
+        
         if len(data_A) == 4 and len(data_B) == 4:
+            
             _, warped_A, target_A, _ = data_A
             _, warped_B, target_B, _ = data_B
         elif len(data_A) == 3 and len(data_B) == 3:
@@ -325,6 +327,7 @@ class FaceswapGANModel():
             warped_B, target_B, _ = data_B
         else:
             raise ValueError("Something's wrong with the input data generator.")
+        
         errDA = self.netDA_train([warped_A, target_A])
         errDB = self.netDB_train([warped_B, target_B])
         return errDA, errDB
